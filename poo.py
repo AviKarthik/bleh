@@ -1,1 +1,3 @@
 python -c "from ai_edge_litert.interpreter import Interpreter; i=Interpreter(model_path='/home/mvrop-avi/model_full_int8.tflite'); i.allocate_tensors(); print(i.get_input_details())"
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+[{'name': 'serving_default_keras_tensor_322:0', 'index': 0, 'shape': array([  1, 224, 224,   3], dtype=int32), 'shape_signature': array([ -1, 224, 224,   3], dtype=int32), 'dtype': <class 'numpy.int8'>, 'quantization': (1.0, -128), 'quantization_parameters': {'scales': array([1.], dtype=float32), 'zero_points': array([-128], dtype=int32), 'quantized_dimension': 0, 'block_size': 0}, 'sparsity_parameters': {}}]
