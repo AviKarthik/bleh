@@ -4,7 +4,7 @@ import numpy as np
 import cv2
 import time
 
-MODEL_PATH = "/home/mvrop-avi/model.tflite"
+MODEL_PATH = "/home/mvrop-avi/model.tflite"   # change if your filename is different
 LABELS_PATH = "/home/mvrop-avi/labels.txt"
 
 with open(LABELS_PATH, "r") as f:
@@ -19,7 +19,17 @@ output_details = interpreter.get_output_details()
 input_shape = input_details[0]["shape"]
 input_dtype = input_details[0]["dtype"]
 
-_, H, W, C = input_shape
+print("Input shape:", input_shape)
+print("Input dtype:", input_dtype)
+
+if len(input_shape) == 4:
+    _, H, W, C = input_shape
+    use_batch_dim = True
+elif len(input_shape) == 3:
+    H, W, C = input_shape
+    use_batch_dim = False
+else:
+    raise ValueError(f"Unexpected input shape: {input_shape}")
 
 picam2 = Picamera2()
 config = picam2.create_preview_configuration(main={"size": (640, 480)})
@@ -37,11 +47,15 @@ def run_once():
     else:
         img = img.astype(input_dtype)
 
-    img = np.expand_dims(img, axis=0)
+    if use_batch_dim:
+        img = np.expand_dims(img, axis=0)
 
     interpreter.set_tensor(input_details[0]["index"], img)
     interpreter.invoke()
-    output = interpreter.get_tensor(output_details[0]["index"])[0]
+    output = interpreter.get_tensor(output_details[0]["index"])
+
+    if len(output.shape) > 1:
+        output = output[0]
 
     pred_idx = int(np.argmax(output))
     pred_label = labels[pred_idx] if pred_idx < len(labels) else f"class_{pred_idx}"
